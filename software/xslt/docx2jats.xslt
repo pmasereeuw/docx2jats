@@ -18,8 +18,8 @@
     <!-- apply-table-backgrounds: if 'yes', do a conversion of DOCX table shading to CSS background-color styles -->
     <xsl:param name="apply-table-backgrounds" select="'no'"/>
 
-    <!-- Specify yes for absolute table column width (taken from Word) or no for relative ones. -->
-    <xsl:param name="absolute-table-column-width" select="'yes'"/>
+    <!-- Specify 'yes' for absolute table column width (taken from Word) or 'no' for relative ones (percentages). -->
+    <xsl:param name="absolute-table-column-width" select="'no'"/>
 
     <xsl:param name="word-to-inch-divisor-for-tables" select="1400" as="xs:integer"/>
 
@@ -1079,21 +1079,23 @@
                     <!-- Generate a style attribute for any borders. Note that this currently excludes any other style properties. -->
                     <xsl:call-template name="doTableBorders"/>
                     
-                    <!--<xsl:variable name="sum-grid-cols" select="pcm:sum-grid-cols(w:tblGrid)"/>-->
-                    <xsl:for-each select="w:tblGrid/w:gridCol">
-                        <xsl:variable name="width" select="
-                            if ($absolute-table-column-width eq 'yes') then
-                            xs:integer(@w:w)
-                            else
-                            xs:integer(round(@w:w div 100))" as="xs:integer"/>
-                        <xsl:variable name="colwidth"
-                            select="
-                            if ($absolute-table-column-width eq 'yes') then
-                            concat($width div $word-to-inch-divisor-for-tables, 'in')
-                            else
-                            concat($width, '*')" as="xs:string"/>
-                        <col width="{$colwidth}"/>
-                    </xsl:for-each>
+                    <xsl:choose>
+                        <xsl:when test="$absolute-table-column-width eq 'yes'">
+                            <xsl:for-each select="w:tblGrid/w:gridCol">
+                                <xsl:variable name="width" select="xs:integer(@w:w)"/>
+                                <col width="{concat($width div $word-to-inch-divisor-for-tables, 'in')}"/>
+                            </xsl:for-each>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:variable name="colwidths" as="xs:integer+" select="for $col in w:tblGrid/w:gridCol return xs:integer($col/@w:w)"/>
+                            <xsl:variable name="summed-colwidths" as="xs:integer" select="sum($colwidths)"/>
+                            <xsl:for-each select="w:tblGrid/w:gridCol">
+                                <xsl:variable name="width" as="xs:integer" select="xs:integer(@w:w)"/>
+                                <xsl:variable name="percentage" as="xs:float" select="100 div ($summed-colwidths div $width)"/>
+                                <col width="{format-number($percentage, '#.##') || '%'}"/>
+                            </xsl:for-each>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </colgroup>
                 <xsl:if test="w:tr/w:trPr/w:tblHeader">
                     <!-- Aanname: header regels staan aan het begin van de tabel, niet halverwege -->
