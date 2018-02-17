@@ -5,8 +5,8 @@
     xmlns:pcm="http://www.masereeuw.nl/xslt/3.0/functions"
     exclude-result-prefixes="xs pcm" version="3.0">
     
-    <xsl:function name="pcm:get-ibo-uuid" as="xs:string">
-        <xsl:value-of select="'id-' || pcm:get-uuid()"/>
-    </xsl:function>
+    <!--<xsl:function name="pcm:get-ibo-uuid" as="xs:string">
+        <xsl:value-of select="'pieterid-' || pcm:get-uuid()"/>
+    </xsl:function>-->
     
 </xsl:stylesheet>

@@ -30,18 +30,10 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="*">
-        <xsl:copy>
-            <xsl:if test="not(@id)">
-                <xsl:attribute name="id" select="pcm:get-ibo-uuid()"/>
-            </xsl:if>
-            <xsl:apply-templates select="node() | @*"/>            
-        </xsl:copy>
-    </xsl:template>
+   <xsl:template match="node() | @*">
+       <xsl:copy>
+           <xsl:apply-templates select="node() | @*"/>
+       </xsl:copy>
+   </xsl:template>
     
-    <xsl:template match="node() except *| @*">
-        <xsl:copy>
-        </xsl:copy>
-    </xsl:template>
-
 </xsl:stylesheet>
