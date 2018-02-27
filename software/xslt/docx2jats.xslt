@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"
     xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pcm="http://www.masereeuw.nl/xslt/3.0/functions" xmlns:rels="http://schemas.openxmlformats.org/package/2006/relationships"
-    xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:xlink="http://www.w3.org/1999/xlink" exclude-result-prefixes="xs w pic wp a pcm rels r o" version="3.0">
+    xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:xlink="http://www.w3.org/1999/xlink" exclude-result-prefixes="xs w pic wp a pcm rels r o" expand-text="yes" version="3.0">
 
     <!-- Result language. If absent, try to find it in the document. -->
     <xsl:param name="language-code" as="xs:string" select="''"/>
@@ -669,8 +669,9 @@
             <xsl:when test="parent::w:body and matches($style, 'heading_[1-9]')">
                 <!-- Make it a section title with a style: -->
                 <p>
-                    <xsl:processing-instruction name="style" select="concat($style-prefix, 'heading_', substring-after($style, '_'))"/>
                     <xsl:apply-templates select="w:r | w:bookmarkStart | w:fldSimple"/>
+                    <!-- Plaats de processing-instruction aan het eind van de <p> om te voorkomen dat we problemen krijgen als templates een attribuut aan deze <p> willen toevoegen. -->
+                    <xsl:processing-instruction name="style" select="concat($style-prefix, 'heading_', substring-after($style, '_'))"/>
                 </p>
             </xsl:when>
             <xsl:when test="pcm:isListStyle(.)">
@@ -715,8 +716,9 @@
             <xsl:otherwise>
                 <!-- Styles that we don't know are considered standard (Standaard), but we store the original name as well. -->
                 <p>
-                    <xsl:processing-instruction name="style" select="normalize-space(concat($style-prefix, 'standard ', $style-prefix, $style))"/>
                     <xsl:apply-templates select="w:r | w:bookmarkStart | w:fldSimple | w:hyperlink"/>
+                    <!-- Plaats de processing-instruction aan het eind van de <p> om te voorkomen dat we problemen krijgen als templates een attribuut aan deze <p> willen toevoegen. -->
+                    <xsl:processing-instruction name="style" select="normalize-space(concat($style-prefix, 'standard ', $style-prefix, $style))"/>
                 </p>
             </xsl:otherwise>
         </xsl:choose>
@@ -775,9 +777,13 @@
             <xsl:apply-templates select="$styled-content" mode="replace-styled-content"/>
         </xsl:if>
     </xsl:template>
-
+    
+    <!-- Onderdruk w:sdtPr en w:sdtEndPr zolang we niet weten wat het is, omdat de geneste w:rPr problemen veroorzaakt. -->
+    <xsl:template match="w:sdtPr | w:sdtEndPr"/>        
+       
     <xsl:template match="w:rPr">
         <xsl:variable name="fontsize" select="
+            
                 if (w:sz) then
                     concat($style-prefix, 'font-size_', w:sz/@w:val div 2, ' ')
                 else
