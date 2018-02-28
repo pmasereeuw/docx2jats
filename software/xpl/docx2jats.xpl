@@ -23,7 +23,7 @@
         <p:with-option name="href" select="$relsfile"/>
     </p:load>
     
-    <p:xslt name="stap1">
+    <p:xslt name="stap01">
         <p:input port="stylesheet">
             <p:document href="../xslt/docx2jats.xslt"/>
         </p:input>
@@ -44,7 +44,7 @@
         </p:otherwise>
     </p:choose>
     
-    <p:xslt name="stap2">
+    <p:xslt name="stap02">
         <p:input port="stylesheet">
             <p:document href="../xslt/apply-jats-sections.xslt"/>
         </p:input>
@@ -64,13 +64,13 @@
         </p:otherwise>
     </p:choose>
     
-    <p:xslt name="stap3">
+    <p:xslt name="stap03">
         <p:input port="stylesheet">
-            <p:document href="../xslt/apply-ibo-ids.xslt"/>
+            <p:document href="../xslt/deal-with-ibo-specific-styles.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
-    
+
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
@@ -82,14 +82,14 @@
             <p:identity/>
         </p:otherwise>
     </p:choose>
-    
-    <p:xslt name="stap4">
+
+    <p:xslt name="stap04">
         <p:input port="stylesheet">
-            <p:document href="../xslt/deal-with-anchors.xslt"/>
+            <p:document href="../xslt/apply-ibo-ids.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
-
+    
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
@@ -102,13 +102,13 @@
         </p:otherwise>
     </p:choose>
     
-    <p:xslt name="stap5">
+    <p:xslt name="stap05">
         <p:input port="stylesheet">
-            <p:document href="../xslt/deal-with-front.xslt"/>
+            <p:document href="../xslt/deal-with-anchors.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
-    
+
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
@@ -121,14 +121,33 @@
         </p:otherwise>
     </p:choose>
     
-    <p:xslt name="stap6a">
+    <p:xslt name="stap06">
+        <p:input port="stylesheet">
+            <p:document href="../xslt/deal-with-front.xslt"/>
+        </p:input>
+        <p:with-param name="debug" select="$debug"/>
+    </p:xslt>
+    
+    <p:choose>
+        <p:when test="$debug eq 'true'">
+            <pcm:tee>
+                <p:with-option name="href" select="'/tmp/DEBUG/060.xml'"/>
+                <p:with-option name="indent" select="true()"/>
+            </pcm:tee>
+        </p:when>
+        <p:otherwise>
+            <p:identity/>
+        </p:otherwise>
+    </p:choose>
+    
+    <p:xslt name="stap07">
         <p:input port="stylesheet">
             <p:document href="../xslt/remove-empty-styled-content.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
     
-    <p:xslt name="stap6b">
+    <p:xslt name="stap08">
         <p:input port="stylesheet">
             <p:document href="../xslt/fix-inlines.xslt"/>
         </p:input>
@@ -146,7 +165,7 @@
         </p:otherwise>
     </p:choose>
     
-    <p:xslt name="stap7">
+    <p:xslt name="stap09">
         <p:input port="stylesheet">
             <p:document href="../xslt/add-schemata.xslt"/>
         </p:input>
