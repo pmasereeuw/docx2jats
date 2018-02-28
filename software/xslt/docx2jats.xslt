@@ -56,7 +56,7 @@
     <!-- Stylenames (from the Word styles document, but normalized (e.g., spaces to underscore, lower case) that
          indicate that we are dealing with a list:
     -->
-    <xsl:variable name="list-style-names" as="xs:string+" select="('list_unordered', 'list_arabic', 'listbullet', 'list_bullet', 'list_number')"/>
+    <xsl:variable name="list-style-names" as="xs:string+" select="('list_unordered', 'list_arabic', 'list_arabic_continued', 'listbullet', 'list_bullet', 'list_number')"/>
 
     <xsl:function name="pcm:errormessage" as="xs:string">
         <xsl:param name="message" as="xs:string"/>
@@ -1258,7 +1258,7 @@
             <xsl:when test="$style = ('list_unordered', 'bullet')">
                 <xsl:value-of select="'bullet'"/>
             </xsl:when>
-            <xsl:when test="$style = ('list_arabic', 'decimal')">
+            <xsl:when test="$style = ('list_arabic', 'list_arabic_continued', 'decimal')">
                 <xsl:value-of select="'order'"/>
             </xsl:when>
             <xsl:when test="$style eq 'lowerLetter'">
@@ -1304,6 +1304,7 @@
             <xsl:call-template name="doListItems">
                 <xsl:with-param name="listItem" select="$listItem"/>
             </xsl:call-template>
+            <xsl:processing-instruction name="style" select="$listItem/@style"/>
         </list>
     </xsl:template>
 

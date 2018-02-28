@@ -80,7 +80,7 @@
     <xsl:template match="p[pcm:style-pi-contains(., $NOTE-NEXT-STYLE) and pcm:preceding-belongs-to-stylegroup(preceding-sibling::*[1], $NOTE-FIRST-STYLE, $NOTE-NEXT-STYLE)]"/>
 
     <xsl:template match="p[pcm:style-pi-contains(., $NOTE-FIRST-STYLE)]" mode="boxed-text">
-        <caption><title><xsl:apply-templates select="@* | node()"/></title></caption>
+        <caption content-type="box-title"><title><xsl:apply-templates select="@* | node()"/></title></caption>
     </xsl:template>
     
     <xsl:template match="p[pcm:style-pi-contains(., $NOTE-NEXT-STYLE)]" mode="boxed-text">
