@@ -15,8 +15,10 @@
         <xsl:choose>
             <xsl:when test="$stylename eq 'IB-italic'"><italic/></xsl:when>
             <xsl:when test="$stylename eq 'IB-italics'"><italic/></xsl:when>
+            <xsl:when test="$stylename eq 'IB-emphasis'"><italic/></xsl:when>
             <xsl:when test="$stylename eq 'IB-font-style_italic'"><italic/></xsl:when>
             <xsl:when test="$stylename eq 'IB-bold'"><bold/></xsl:when>
+            <xsl:when test="$stylename eq 'IB-strong'"><bold/></xsl:when>
             <xsl:when test="$stylename eq 'IB-font-weight_bold'"><bold/></xsl:when>
             <xsl:when test="$stylename eq 'IB-superscript'"><sup/></xsl:when>
             <xsl:when test="$stylename eq 'IB-vertical-align_super'"><sup/></xsl:when>
@@ -76,7 +78,7 @@
     
     <xsl:template match="styled-content/@style">
         <xsl:variable name="parent" as="element(styled-content)" select="parent::styled-content"/>
-        <xsl:variable name="stylestrings" as="xs:string*" select="tokenize(., '\s+')"/>
+        <xsl:variable name="stylestrings" as="xs:string*" select="tokenize(., ';')"/>
         <xsl:iterate select="$stylestrings">
             <xsl:param name="new-stylestrings" as="xs:string*" select="$stylestrings"/>
             <xsl:param name="elements-to-be-generated" as="element()*" select="()"></xsl:param>

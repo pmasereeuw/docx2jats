@@ -16,7 +16,7 @@
     <xsl:param name="apply-table-borders" select="'yes'"/>
 
     <!-- apply-table-backgrounds: if 'yes', do a conversion of DOCX table shading to CSS background-color styles -->
-    <xsl:param name="apply-table-backgrounds" select="'no'"/>
+    <xsl:param name="apply-table-backgrounds" select="'yes'"/>
 
     <!-- Specify 'yes' for absolute table column width (taken from Word) or 'no' for relative ones (percentages). -->
     <xsl:param name="absolute-table-column-width" select="'no'"/>
@@ -56,8 +56,43 @@
     <!-- Stylenames (from the Word styles document, but normalized (e.g., spaces to underscore, lower case) that
          indicate that we are dealing with a list:
     -->
-    <xsl:variable name="list-style-names" as="xs:string+" select="('list_unordered', 'list_arabic', 'list_arabic_continued', 'listbullet', 'list_bullet', 'list_number')"/>
+    <xsl:variable name="bullet_list-style-names" as="xs:string+" select="('list_unordered', 'continued_list_unordered', 'listbullet', 'list_bullet','note_list_(bullet)')"/>
+    <xsl:variable name="number_list-style-names" as="xs:string+" select="('list_arabic', 'continued_list_arabic', 'list_number')"/>
+    
+    <xsl:variable name="list-style-names" as="xs:string+" select="($bullet_list-style-names, $number_list-style-names)"/>
 
+    <xsl:function name="pcm:get-list-type" as="xs:string">
+        <xsl:param name="style" as="xs:string?"/>
+        <xsl:param name="level" as="xs:integer?"/>
+        <xsl:choose>
+            <xsl:when test="$style = $bullet_list-style-names">
+                <xsl:value-of select="'bullet'"/>
+            </xsl:when>
+            <xsl:when test="$style = $number_list-style-names">
+                <xsl:value-of select="'order'"/>
+            </xsl:when>
+            <!-- TODO Nog niet gezien in sample content: -->
+            <xsl:when test="$style eq 'lowerLetter'">
+                <xsl:value-of select="'lower-alpha'"/>
+            </xsl:when>
+            <xsl:when test="$style eq 'upperLetter'">
+                <xsl:value-of select="'upper-alpha'"/>
+            </xsl:when>
+            <xsl:when test="$style eq 'lowerRoman'">
+                <xsl:value-of select="'lower-roman'"/>
+            </xsl:when>
+            <xsl:when test="$style eq 'upperRoman'">
+                <xsl:value-of select="'upper-roman'"/>
+            </xsl:when>
+            <xsl:when test="not($style)">
+                <xsl:value-of select="'none'"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$style"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    
     <xsl:function name="pcm:errormessage" as="xs:string">
         <xsl:param name="message" as="xs:string"/>
         <xsl:variable name="errormessage" select="concat('*', $message, '*')"/>
@@ -337,7 +372,7 @@
                 <xsl:variable name="shading" select="$currentCell/w:tcPr/w:shd/@w:fill" as="xs:string?"/>
                 <xsl:choose>
                     <xsl:when test="$shading != ''">
-                        <xsl:value-of select="concat($style-prefix, 'background-color_', $shading)"/>
+                        <xsl:value-of select="concat('CSS_background-color_', $shading)"/>
                     </xsl:when>
                     <xsl:otherwise>
                         <xsl:value-of select="''"/>
@@ -512,6 +547,16 @@
         <xsl:param name="element" as="element(w:p)"/>
         <xsl:variable name="style" select="pcm:getStyleForP($element)" as="xs:string"/>
         <xsl:sequence select="some $list-style-name in $list-style-names satisfies starts-with($style, $list-style-name)"/>
+    </xsl:function>
+    
+    <xsl:function name="pcm:inferred-styles" as="xs:string*">
+        <xsl:param name="basic-style" as="xs:string"/>
+        <xsl:choose>
+            <!-- Note: deliberately leaving out the style-prefix for lists after the word "continue_" -->
+            <xsl:when test="starts-with($basic-style, 'continued_')"><xsl:value-of select="string-join(($style-prefix || 'continued-list', substring-after($basic-style, 'continued_')), ' ')"/></xsl:when>
+            <xsl:when test="starts-with($basic-style, 'note')"><xsl:value-of select="string-join(($style-prefix || 'note', $style-prefix || substring-after($basic-style, 'note')), ' ')"/></xsl:when>
+            <xsl:otherwise><xsl:sequence select="()"/></xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
 
     <xsl:function name="pcm:listlevel" as="xs:integer">
@@ -717,8 +762,13 @@
                 <!-- Styles that we don't know are considered standard (Standaard), but we store the original name as well. -->
                 <p>
                     <xsl:apply-templates select="w:r | w:bookmarkStart | w:fldSimple | w:hyperlink"/>
+                    <!-- Check any special text-align instructions for this paragraph: -->
+                    <xsl:variable name="text-align-aux" as="xs:string?" select="w:pPr/w:jc/@w:val[. ne 'left']"/>
+                    <xsl:variable name="text-align" as="xs:string?" select="if (exists($text-align-aux)) then $style-prefix || 'text-align_' || $text-align-aux else ()"/>
+                    
                     <!-- Plaats de processing-instruction aan het eind van de <p> om te voorkomen dat we problemen krijgen als templates een attribuut aan deze <p> willen toevoegen. -->
-                    <xsl:processing-instruction name="style" select="normalize-space(concat($style-prefix, 'standard ', $style-prefix, $style))"/>
+                    <xsl:processing-instruction name="style"
+                        select="string-join( ($style-prefix || 'standard', $style-prefix || $style, $text-align, pcm:inferred-styles($style)), ' ')"/>
                 </p>
             </xsl:otherwise>
         </xsl:choose>
@@ -782,8 +832,7 @@
     <xsl:template match="w:sdtPr | w:sdtEndPr"/>        
        
     <xsl:template match="w:rPr">
-        <xsl:variable name="fontsize" select="
-            
+        <xsl:variable name="fontsize" select="            
                 if (w:sz) then
                     concat($style-prefix, 'font-size_', w:sz/@w:val div 2, ' ')
                 else
@@ -847,7 +896,7 @@
         <xsl:variable name="style" select="normalize-space(concat($aux2, ' ', $style))"/>
 
         <xsl:if test="$style != ''">
-            <!-- Note: many of the style names in @style will later be replaced by Dita elements like <b>, <i> and <sup> -->
+            <!-- Note: many of the style names in @style will later be replaced by elements like <b>, <i> and <sup> -->
             <xsl:attribute name="style" select="$style"/>
         </xsl:if>
     </xsl:template>
@@ -923,14 +972,14 @@
                 <!-- There were other style names then the known ones. Create a <styled-content> for them with the style attribute set to the new-output-class variable: -->
                 <styled-content style="{$new-output-class}">
                     <!-- Deal with both the known and unknown output classes, i.e., create a  element for each of them: -->
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="@style"/>
                     </xsl:call-template>
                 </styled-content>
             </xsl:when>
             <xsl:otherwise>
                 <!-- There were only known output classes. No need to create a  element; they will be created by dealing with the known output classes: -->
-                <xsl:call-template name="replace-">
+                <xsl:call-template name="replace-styled-content">
                     <xsl:with-param name="style" select="@style"/>
                 </xsl:call-template>
             </xsl:otherwise>
@@ -943,40 +992,40 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template name="replace-">
+    <xsl:template name="replace-styled-content">
         <xsl:param name="style" required="yes"/>
         <xsl:choose>
             <xsl:when test="contains($style, concat($style-prefix, 'font-weight_bold'))">
                 <b>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'font-weight_bold'), '')"/>
                     </xsl:call-template>
                 </b>
             </xsl:when>
             <xsl:when test="contains($style, concat($style-prefix, 'font-style_italic'))">
                 <i>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'font-style_italic'), '')"/>
                     </xsl:call-template>
                 </i>
             </xsl:when>
             <xsl:when test="contains($style, concat($style-prefix, 'text-decoration_underline'))">
                 <u>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'text-decoration_underline'), '')"/>
                     </xsl:call-template>
                 </u>
             </xsl:when>
             <xsl:when test="contains($style, concat($style-prefix, 'vertical-align_super'))">
                 <sup>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'vertical-align_super'), '')"/>
                     </xsl:call-template>
                 </sup>
             </xsl:when>
             <xsl:when test="contains($style, concat($style-prefix, 'vertical-align_sub'))">
                 <sub>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'vertical-align_sub'), '')"/>
                     </xsl:call-template>
                 </sub>
@@ -985,35 +1034,35 @@
                 template <xsl:template match="[@style]" mode="replace-">: -->
             <xsl:when test="contains($style, 'Emphasis')">
                 <i>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'Emphasis'), '')"/>
                     </xsl:call-template>
                 </i>
             </xsl:when>
             <xsl:when test="contains($style, 'Strong')">
                 <b>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'Strong'), '')"/>
                     </xsl:call-template>
                 </b>
             </xsl:when>
             <xsl:when test="contains($style, 'Subscript')">
                 <sub>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'Subscript'), '')"/>
                     </xsl:call-template>
                 </sub>
             </xsl:when>
             <xsl:when test="contains($style, 'Superscript')">
                 <sup>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'Superscript'), '')"/>
                     </xsl:call-template>
                 </sup>
             </xsl:when>
             <xsl:when test="contains($style, 'Formula')">
                 <codeph>
-                    <xsl:call-template name="replace-">
+                    <xsl:call-template name="replace-styled-content">
                         <xsl:with-param name="style" select="replace($style, concat($style-prefix, 'Formula'), '')"/>
                     </xsl:call-template>
                 </codeph>
@@ -1179,7 +1228,7 @@
                 <xsl:variable name="shading" as="xs:string" select="pcm:cellShading(.)"/>
                 <xsl:variable name="borders" as="xs:string" select="pcm:cellBorders(.)"/>
 
-                <xsl:variable name="style" select="normalize-space(concat($shading, $borders))"/>
+                <xsl:variable name="style" select="normalize-space(concat($shading, ' ', $borders))"/>
                 <xsl:if test="$style != ''">
                     <xsl:attribute name="style" select="$style"/>
                 </xsl:if>
@@ -1251,37 +1300,6 @@
         </xsl:choose>
     </xsl:function>
 
-    <xsl:function name="pcm:get-list-type" as="xs:string">
-        <xsl:param name="style" as="xs:string?"/>
-        <xsl:param name="level" as="xs:integer?"/>
-        <xsl:choose>
-            <xsl:when test="$style = ('list_unordered', 'bullet')">
-                <xsl:value-of select="'bullet'"/>
-            </xsl:when>
-            <xsl:when test="$style = ('list_arabic', 'list_arabic_continued', 'decimal')">
-                <xsl:value-of select="'order'"/>
-            </xsl:when>
-            <xsl:when test="$style eq 'lowerLetter'">
-                <xsl:value-of select="'lower-alpha'"/>
-            </xsl:when>
-            <xsl:when test="$style eq 'upperLetter'">
-                <xsl:value-of select="'upper-alpha'"/>
-            </xsl:when>
-            <xsl:when test="$style eq 'lowerRoman'">
-                <xsl:value-of select="'lower-roman'"/>
-            </xsl:when>
-            <xsl:when test="$style eq 'upperRoman'">
-                <xsl:value-of select="'upper-roman'"/>
-            </xsl:when>
-            <xsl:when test="not($style)">
-                <xsl:value-of select="'none'"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="$style"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-
     <xsl:template match="@* | node()" mode="stage2">
         <xsl:copy>
             <xsl:apply-templates select="@* | node()" mode="stage2"/>
@@ -1304,7 +1322,7 @@
             <xsl:call-template name="doListItems">
                 <xsl:with-param name="listItem" select="$listItem"/>
             </xsl:call-template>
-            <xsl:processing-instruction name="style" select="$listItem/@style"/>
+            <xsl:processing-instruction name="style" select="$listItem/@style || ' ' || pcm:inferred-styles($listItem/@style)"/>
         </list>
     </xsl:template>
 
