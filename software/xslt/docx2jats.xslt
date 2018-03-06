@@ -1155,13 +1155,17 @@
                 <xsl:if test="w:tr/w:trPr/w:tblHeader">
                     <!-- Aanname: header regels staan aan het begin van de tabel, niet halverwege -->
                     <thead>
-                        <xsl:apply-templates select="w:tr[w:trPr/w:tblHeader]"/>
+                        <xsl:apply-templates select="w:tr[w:trPr/w:tblHeader]">
+                            <xsl:with-param as="xs:string" name="td-or-th" select="'th'" tunnel="yes"/>
+                        </xsl:apply-templates>
                     </thead>
                 </xsl:if>
                 <tbody>
                     <xsl:choose>
                         <xsl:when test="w:tr[not(w:trPr/w:tblHeader)]">
-                            <xsl:apply-templates select="w:tr[not(w:trPr/w:tblHeader)]"/>
+                            <xsl:apply-templates select="w:tr[not(w:trPr/w:tblHeader)]">
+                                <xsl:with-param as="xs:string" name="td-or-th" select="'td'" tunnel="yes"/>
+                            </xsl:apply-templates>
                         </xsl:when>
                         <xsl:otherwise>
                             <tr>
@@ -1218,10 +1222,11 @@
     </xsl:template>
 
     <xsl:template match="w:tc">
+        <xsl:param name="td-or-th" as="xs:string" required="yes" tunnel="yes"/>
         <!-- Een verticale span begint bij w:tcPr/w:vMerge met @w:val="restart". De onderliggende cellen zijn leeg,
              en worden gekenmerkt door w:tcPr/w:vMerge zonder @w:val-attribuut. -->
         <xsl:if test="not(w:tcPr/w:vMerge) or w:tcPr/w:vMerge[@w:val = 'restart']">
-            <td>
+            <xsl:element name="{$td-or-th}">
                 <!-- Leaving out most formatting properties of the cell -->
 
                 <!-- Generate style attribute if shading or borders supplied. Note that this currently excludes any other style properties. -->
@@ -1247,7 +1252,7 @@
                 </xsl:if>
 
                 <xsl:apply-templates select="*[not(self::w:tcPr)]"/>
-            </td>
+            </xsl:element>
         </xsl:if>
     </xsl:template>
 
