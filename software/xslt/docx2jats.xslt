@@ -102,15 +102,16 @@
         <xsl:value-of select="$errormessage"/>
     </xsl:function>
 
-    <xsl:function name="pcm:extension-from-filename" as="xs:string">
+    <!-- Returns the mimetype and mime-subtype as a sequence of two strings, e.g. 'image' and 'png' respectively. -->
+    <xsl:function name="pcm:mimetype-from-extension" as="xs:string+">
         <xsl:param name="filename" as="xs:string"/>
         <xsl:variable name="extension" select="lower-case(replace($filename, '^.*\.([^./]+)$', '$1'))"/>
         <xsl:choose>
             <xsl:when test="$extension eq 'jpg'">
-                <xsl:value-of select="'image/jpeg'"/>
+                <xsl:sequence select="('image', 'jpeg')"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="'image/' || $extension"/>
+                <xsl:sequence select="('image', $extension)"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
@@ -142,12 +143,16 @@
                 <xsl:when test="not($blipElement)">
                     <xsl:value-of select="pcm:errormessage('missing blipElement element for image')"/>
                 </xsl:when>
-                <xsl:when test="not($blipElement/@r:link)">
-                    <xsl:value-of select="pcm:errormessage('missing r:link-attribute element for image')"/>
+                <xsl:when test="$blipElement/@r:embed">
+                    <xsl:variable name="wantedId" select="$blipElement/@r:embed" as="xs:string"/>
+                    <xsl:value-of select="$documentrelsdoc/rels:Relationships/rels:Relationship[@Id = $wantedId]/@Target"/>
                 </xsl:when>
-                <xsl:otherwise>
+                <xsl:when test="$blipElement/@r:link">
                     <xsl:variable name="wantedId" select="$blipElement/@r:link" as="xs:string"/>
                     <xsl:value-of select="$documentrelsdoc/rels:Relationships/rels:Relationship[@Id = $wantedId]/@Target"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="pcm:errormessage('missing r:embed or r:link-attribute element for image')"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
@@ -1089,10 +1094,13 @@
     <xsl:template match="w:drawing">
         <xsl:variable name="imageFileName" select="pcm:determine-image-file-name(.//pic:pic[1]/pic:blipFill[1]/a:blip)"/>
 
-        <xsl:variable name="mimetype" as="xs:string" select="pcm:extension-from-filename($imageFileName)"/>
+        <xsl:variable name="mimetype-info" as="xs:string+" select="pcm:mimetype-from-extension($imageFileName)"/>
         <fig>
             <graphic xlink:href="{$imageFileName}">
-                <xsl:if test="$mimetype"><xsl:attribute name="mimetype" select="$mimetype"/></xsl:if>
+                <xsl:if test="count($mimetype-info) eq 2">
+                    <xsl:attribute name="mimetype" select="$mimetype-info[1]"/>
+                    <xsl:attribute name="mime-subtype" select="$mimetype-info[2]"/>
+                </xsl:if>
             </graphic>
         </fig>
     </xsl:template>

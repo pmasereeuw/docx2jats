@@ -8,6 +8,8 @@
 
     <p:option name="debug" required="false" select="string(false())"/>
     <p:option name="relsfile" required="true"/>
+    <p:option name="inputmediadirectory" required="true"/>
+    <p:option name="outputmediadirectory" required="true"/>
     <p:option name="outputfile" required="true"/>
     <p:option name="language-code" required="false"/>
     <p:option name="style-prefix" select="'IB-'"/>
@@ -18,6 +20,7 @@
     
     <p:import href="message.xpl"/>
     <p:import href="tee.xpl"/>
+    <p:import href="copy-image.xpl"/>
     
     <p:load name="load">
         <p:with-option name="href" select="$relsfile"/>
@@ -174,8 +177,27 @@
         <p:with-param name="prefix-to-sch-schema" select="$prefix-to-sch-schema"/>
     </p:xslt>
     
-    <!-- TODO DOCTYPE-SYSTEM-->
+    <p:identity name="before-store"/>
+    
     <p:store name="store-file" indent="false" omit-xml-declaration="false">
         <p:with-option name="href" select="$outputfile"/>
     </p:store>
+    
+    <p:xslt name="collect-graphics">
+        <p:input port="stylesheet">
+            <p:document href="../xslt/collect-graphics.xslt"/>
+        </p:input>
+        <p:input port="source">
+            <p:pipe port="result" step="before-store"/>
+        </p:input>
+        <p:with-param name="debug" select="$debug"/>
+    </p:xslt>
+
+    <p:for-each>
+        <p:iteration-source select="/graphics/graphic"/>
+        <pcm:copy-image>
+            <p:with-option name="absoluteURIOfInputImage" select="concat($inputmediadirectory, '/', graphic/@href)"/>
+            <p:with-option name="outputImageFilename" select="concat($outputmediadirectory, '/', graphic/@href)"/>
+        </pcm:copy-image>
+    </p:for-each>    
 </p:declare-step>

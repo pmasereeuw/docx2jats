@@ -157,7 +157,7 @@
         </xsl:copy>
     </xsl:template>
     
-    <!-- ** styles (for table) ** -->
+    <!-- *** styles (for table) *** -->
     
     <xsl:template match="@style">
         <xsl:variable name="tokenized" as="xs:string*" select="tokenize(., '\s+')"/>
@@ -186,6 +186,20 @@
         </xsl:variable>
         
         <xsl:attribute name="style" select="string-join(($adjusted-styles, $text-align), ';')"/>
+    </xsl:template>
+    
+    <!-- *** Verwijder loze <p> rond <fig> *** -->
+    
+    <xsl:template match="p[fig]">
+        <xsl:choose>
+            <xsl:when test="count(fig) eq count(node()[not(self::text()[normalize-space() eq ''])])">
+                <xsl:apply-templates select="fig"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <!-- Inline image? -->
+                <xsl:copy><xsl:apply-templates select="@* | node()"/></xsl:copy>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     
 </xsl:stylesheet>

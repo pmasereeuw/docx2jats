@@ -37,7 +37,7 @@ language_code=$2
 basedocxfile=`basename "$docxfile" .docx`
 fullpathdocxfile=`realpath "$docxfile"`
 dirofdocxfile=`dirname "$fullpathdocxfile"`
-
+outputfolder=$dirofdocxfile/$basedocxfile
 if [ $KEEPTMP = yes ]
 then
      workfolder=$TMPFOLDER/$basedocxfile
@@ -58,8 +58,10 @@ fi
 
 "$SHFOLDER/xproc.sh" "$XPLFOLDER/docx2jats.xpl" \
   "debug=$DEBUG" \
-  "relsfile=file://"$workfolder"/_rels/.rels" \
-  "outputfile=file://$dirofdocxfile/$basedocxfile.xml" \
+  "relsfile=file://$workfolder/_rels/.rels" \
+  "outputfile=file://$outputfolder/$basedocxfile.xml" \
+  "inputmediadirectory=file://$workfolder/word/media" \
+  "outputmediadirectory=file://$outputfolder" \
   "language-code=$language_code" \
   "prefix-to-rng-schema=$PREFIX_TO_RNG_SCHEMA" \
   "prefix-to-sch-schema=$PREFIX_TO_SCH_SCHEMA"
