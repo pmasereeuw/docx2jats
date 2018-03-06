@@ -6,36 +6,16 @@
     expand-text="yes"
     exclude-result-prefixes="xs pcm" version="3.0">
     
-    <xsl:variable name="NOTE-FIRST-STYLE" as="xs:string" select="'IB-note_heading1'"/>
+    <xsl:variable name="NOTE-HEADING-STYLE" as="xs:string" select="'IB-note_heading1'"/>
     <xsl:variable name="NOTE-INDICATOR-STYLE" as="xs:string" select="'IB-note'"/>
     <xsl:variable name="CAPTION-FIRST-STYLE" as="xs:string" select="'IB-caption_number'"/>
     <xsl:variable name="CAPTION-NEXT-STYLE" as="xs:string" select="'IB-caption_text'"/>
     <xsl:variable name="CONTINUED-LIST_STYLE" as="xs:string" select="'IB-continued-list'"/>
     
     <xsl:function name="pcm:style-pi-contains"  as="xs:boolean">
-        <xsl:param name="context" as="element()"/>
+        <xsl:param name="context" as="element()?"/>
         <xsl:param name="stylename" as="xs:string"/>
         <xsl:sequence select="exists($context/processing-instruction(style)[$stylename = tokenize(., '\s+')])"/>
-    </xsl:function>
-    
-    <xsl:function name="pcm:preceding-belongs-to-stylegroup"  as="xs:boolean">
-        <xsl:param name="preceding" as="element()"/>
-        <xsl:param name="name-first-style" as="xs:string"/>
-        <xsl:param name="name-indicator-style" as="xs:string"/>
-        <xsl:choose>
-            <xsl:when test="not($preceding)">
-                <xsl:sequence select="false()"/>
-            </xsl:when>
-            <xsl:when test="pcm:style-pi-contains($preceding, $name-first-style)">
-                <xsl:sequence select="true()"/>
-            </xsl:when>
-            <xsl:when test="pcm:style-pi-contains($preceding, $name-indicator-style)">
-                <xsl:sequence select="pcm:preceding-belongs-to-stylegroup($preceding/preceding-sibling::*[1], $name-first-style, $name-indicator-style)"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:sequence select="false()"/>
-            </xsl:otherwise>
-        </xsl:choose>
     </xsl:function>
     
     <xsl:function name="pcm:fig-precedes-caption"  as="xs:boolean">
@@ -86,7 +66,8 @@
     
     <!-- **** boxed-text *** -->
     
-    <xsl:template match="p[pcm:style-pi-contains(., $NOTE-FIRST-STYLE)]">
+    <!-- Match the first paragraph of a boxed-text section. -->
+    <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and not(pcm:style-pi-contains(preceding-sibling::*[1], $NOTE-INDICATOR-STYLE))]">
         <boxed-text>
             <xsl:apply-templates select="." mode="boxed-text"/>
             <xsl:iterate select="following-sibling::*">
@@ -103,13 +84,20 @@
     </xsl:template>
     
     <!-- Element is pulled inside boxed-text. -->
-    <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and pcm:preceding-belongs-to-stylegroup(preceding-sibling::*[1], $NOTE-FIRST-STYLE, $NOTE-INDICATOR-STYLE)]"/>
+    <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and pcm:style-pi-contains(preceding-sibling::*[1], $NOTE-INDICATOR-STYLE)]"/>
 
-    <xsl:template match="p[pcm:style-pi-contains(., $NOTE-FIRST-STYLE)]" mode="boxed-text">
-        <caption content-type="box-title"><title><xsl:apply-templates select="@* | node()"/></title></caption>
+    <xsl:template match="p[pcm:style-pi-contains(., $NOTE-HEADING-STYLE)]" mode="boxed-text">
+        <xsl:choose>
+            <xsl:when test="pcm:style-pi-contains(preceding-sibling::*[1], $NOTE-INDICATOR-STYLE)">
+                <xsl:copy><xsl:apply-templates select="@* | node()"/></xsl:copy>
+            </xsl:when>
+            <xsl:otherwise>
+                <caption content-type="box-title"><title><xsl:apply-templates select="@* | node()"/></title></caption>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     
-    <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and not(pcm:style-pi-contains(., $NOTE-FIRST-STYLE))]" mode="boxed-text">
+    <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and not(pcm:style-pi-contains(., $NOTE-HEADING-STYLE))]" mode="boxed-text">
         <xsl:copy><xsl:apply-templates select="@* | node()"/></xsl:copy>
     </xsl:template>
     
