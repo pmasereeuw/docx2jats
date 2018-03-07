@@ -54,7 +54,10 @@ then
     exit 2
 fi
 
-#xslt $BINDIR/docx2jats.xslt "$workfolder"/_rels/.rels "$dirofdocxfile/$basedocxfile.xml" "language-code=$language_code"
+if [ -d "$outputfolder" ]
+then
+   rm -Rf "$outputfolder"
+fi
 
 "$SHFOLDER/xproc.sh" "$XPLFOLDER/docx2jats.xpl" \
   "debug=$DEBUG" \
