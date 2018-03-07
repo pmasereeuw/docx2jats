@@ -110,6 +110,9 @@
             <xsl:when test="$extension eq 'jpg'">
                 <xsl:sequence select="('image', 'jpeg')"/>
             </xsl:when>
+            <xsl:when test="$extension eq 'svg'">
+                <xsl:sequence select="('image', 'svg+xml')"/>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:sequence select="('image', $extension)"/>
             </xsl:otherwise>
