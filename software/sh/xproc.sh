@@ -12,7 +12,7 @@ XPLFILE=$1
 shift
 
 "$JAVACMD" \
-     -Xmx4000m \
+     -Xmx$JAVA_XMX \
      -cp "$CALABASH_JAR:$CALABASHFOLDER/lib/saxon9pe.jar" \
      com.xmlcalabash.drivers.Main \
      --saxon-processor pe \

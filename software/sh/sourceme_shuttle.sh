@@ -10,8 +10,8 @@ export SAXONJAR=$SAXONFOLDER/saxon9pe.jar
 export CALABASH_JAR=$CALABASHFOLDER/xmlcalabash.jar
 
 export JAVA_HOME=/usr/local/jdk
-
 export JAVACMD=$JAVA_HOME/bin/java
+export JAVA_XMX=2000M
 
 if [ -z "$PREFIX_TO_RNG_SCHEMA" ]
 then
