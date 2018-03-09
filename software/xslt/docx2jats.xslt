@@ -836,6 +836,12 @@
         </xsl:if>
     </xsl:template>
     
+    <xsl:template match="w:sdt[w:sdtPr/w:tag[@w:val eq 'IB=Accordion']]">
+        <boxed-text specific-use="collapsible">
+            <xsl:apply-templates/>
+        </boxed-text>
+    </xsl:template>
+    
     <!-- Onderdruk w:sdtPr en w:sdtEndPr zolang we niet weten wat het is, omdat de geneste w:rPr problemen veroorzaakt. -->
     <xsl:template match="w:sdtPr | w:sdtEndPr"/>        
        

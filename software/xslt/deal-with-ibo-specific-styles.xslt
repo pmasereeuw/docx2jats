@@ -64,7 +64,12 @@
         </xsl:copy>
     </xsl:template>
     
-    <!-- **** boxed-text *** -->
+    <!-- **** boxed-text (already supplied) for accordion **** -->
+    <xsl:template match="boxed-text/p[pcm:style-pi-contains(., 'IB-body_text') and not(preceding-sibling::*)]">
+        <caption><title><xsl:apply-templates/></title></caption>
+    </xsl:template>
+    
+    <!-- **** boxed-text for note-style **** -->
     
     <!-- Match the first paragraph of a boxed-text section. -->
     <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and not(pcm:style-pi-contains(preceding-sibling::*[1], $NOTE-INDICATOR-STYLE))]">
@@ -128,19 +133,23 @@
     
     <!-- **** continued list **** -->
     
+    <xsl:function name="pcm:generate-list-id"  as="xs:string">
+        <xsl:param name="list-elmt" as="element(list)"/>
+        <xsl:variable name="num"><xsl:number level="any" select="$list-elmt"/></xsl:variable>
+        <xsl:value-of select="'list-' || $num"/>
+    </xsl:function>
+    
     <!-- TODO Do there need to be restricions on the list-type, e.g. not continuation for ordered lists? And should be check if the adjacent lists have the same type? -->
     <xsl:template match="list[pcm:is-followed-by-continuation-list(.)]">
         <xsl:copy>
-            <!-- TODO Generate an id conforming to IBO's wishes? -->
-            <xsl:attribute name="id" select="'list-' || generate-id()"></xsl:attribute>
+            <xsl:attribute name="id" select="pcm:generate-list-id(.)"></xsl:attribute>
             <xsl:apply-templates select="@* | node()"/>
         </xsl:copy>
     </xsl:template>
     
     <xsl:template match="list[pcm:style-pi-contains(., $CONTINUED-LIST_STYLE)]">
         <xsl:copy>
-            <!-- TODO Generate an id conforming to IBO's wishes? -->
-            <xsl:attribute name="continued-from" select="'list-' || generate-id(preceding-sibling::list[1])"></xsl:attribute>
+            <xsl:attribute name="continued-from" select="pcm:generate-list-id(preceding-sibling::list[1])"></xsl:attribute>
             <xsl:apply-templates select="@* | node()"/>
         </xsl:copy>
     </xsl:template>
@@ -174,20 +183,6 @@
         </xsl:variable>
         
         <xsl:attribute name="style" select="string-join(($adjusted-styles, $text-align), ';')"/>
-    </xsl:template>
-    
-    <!-- *** Verwijder loze <p> rond <fig> *** -->
-    
-    <xsl:template match="p[fig]">
-        <xsl:choose>
-            <xsl:when test="count(fig) eq count(node()[not(self::text()[normalize-space() eq ''])])">
-                <xsl:apply-templates select="fig"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <!-- Inline image? -->
-                <xsl:copy><xsl:apply-templates select="@* | node()"/></xsl:copy>
-            </xsl:otherwise>
-        </xsl:choose>
     </xsl:template>
     
 </xsl:stylesheet>
