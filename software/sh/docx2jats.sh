@@ -3,9 +3,12 @@
 USAGE="Usage: $0 [-keeptmp] docx-file [lang-code]"
 
 WHEREAMI=$(dirname $(realpath $0))
-# sourceme should be a softlink to the real sourceme file
-SOURCEMEDIR=$(dirname $(readlink -f "$WHEREAMI/sourceme"))
-source "$WHEREAMI/sourceme" "$SOURCEMEDIR"
+if [ `whoami` = pieter ]
+then
+   source "$WHEREAMI/sourceme"
+else
+   source "$WHEREAMI/sourceme-`hostname`"
+fi
 
 # Check if DEBUG is part of the envirnoment. Otherwise set it.
 if [ -z "$DEBUG" ]
