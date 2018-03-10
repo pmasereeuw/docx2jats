@@ -15,9 +15,8 @@
 
     <xsl:param name="style-bookmark" select="concat($style-prefix, 'word_bookmark')"/>
 
-    <!-- Title for the section at the end where footnotes are place. In order to suppress footnote generation, pass
-         an empty string. TODO Make the text language dependent. -->
-    <xsl:param name="title-footnotes-section" select="'Notes'" as="xs:string"/>
+    <!-- Pass the string true if footnotes should be suppressed. -->
+    <xsl:param name="suppress-footnotes" select="'false'" as="xs:string"/>
 
     <!-- apply-table-borders: if 'yes', do a conversion of DOCX table borders to CSS border styles -->
     <xsl:param name="apply-table-borders" select="'yes'"/>
@@ -55,8 +54,7 @@
     <xsl:variable name="footnotefile" select="$documentrelsdoc/rels:Relationships/rels:Relationship[@Type = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes']/@Target"/>
     <xsl:variable name="footnotedoc" select="doc(resolve-uri($footnotefile, base-uri($worddoc)))"/>
 
-    <xsl:variable name="FOOTNOTEPREFIX" select="'vn.'"/>
-    <xsl:variable name="FOOTNOTEBACKPREFIX" select="concat('back.', $FOOTNOTEPREFIX)"/>
+    <xsl:variable name="FOOTNOTEPREFIX" select="'fn.'"/>
 
     <xsl:variable name="NL" select="'&#10;'"/>
     
@@ -656,7 +654,13 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
-
+    
+    <xsl:function name="pcm:generate-footnote-id"  as="xs:string">
+        <xsl:param name="footnote-element" as="element(w:footnoteReference)"/>
+        <xsl:variable name="num" as="xs:string"><xsl:number level="any" select="$footnote-element"/></xsl:variable>
+        <xsl:value-of select="concat($FOOTNOTEPREFIX, $num)"/>
+    </xsl:function>
+    
     <xsl:template match="rels:Relationships">
         <!-- Start the main convertion: -->
         <xsl:apply-templates select="$worddoc"/>
@@ -705,15 +709,6 @@
         <xsl:variable name="stage1">
             <body>
                 <xsl:apply-templates/>
-                <xsl:if test="$title-footnotes-section ne ''">
-                    <xsl:if test=".//w:footnoteReference">
-                        <!-- Pull footnotes: -->
-                        <sec specific-use="footnotes'">
-                            <title><xsl:value-of select="$title-footnotes-section"></xsl:value-of></title>
-                            <xsl:apply-templates select=".//w:footnoteReference" mode="footnotepull"/>
-                        </sec>
-                    </xsl:if>
-                </xsl:if>
             </body>
         </xsl:variable>
 
@@ -817,7 +812,7 @@
     </xsl:template>
 
     <xsl:template name="match-text">
-        <xsl:apply-templates select="w:t | w:footnoteReference | w:footnoteRef | w:drawing | w:br"/>
+        <xsl:apply-templates select="w:t | w:footnoteReference | w:drawing | w:br"/>
         <xsl:if test="not(pcm:bookmarkstart-precedes(.))">
             <xsl:variable name="begin-field" select="following-sibling::*[1]/self::w:r[pcm:has-field-start(.)]" as="element()?"/>
             <xsl:if test="$begin-field">
@@ -1150,44 +1145,25 @@
 
     <xsl:template match="w:footnoteReference">
         <xsl:choose>
-            <xsl:when test="$title-footnotes-section ne ''">
+            <xsl:when test="$suppress-footnotes ne 'true'">
                 <!-- w:footnoteReference is in the main document. -->
-                <styled-content style="{concat($style-prefix, 'footnoteNum')}">
-                    <!-- TODO Check the format of anchors -->
-                    <xref id="{concat($FOOTNOTEBACKPREFIX, generate-id())}" rid="{concat($FOOTNOTEPREFIX, generate-id())}">
-                        <xsl:number/>
-                    </xref>
-                </styled-content>
+                <fn id="{pcm:generate-footnote-id(.)}"><xsl:apply-templates select="." mode="footnotepull"/></fn>
             </xsl:when>
-            <xsl:otherwise><xsl:apply-templates/></xsl:otherwise>
+            <xsl:otherwise>
+                <xsl:comment>Footnote suppressed</xsl:comment>
+                <xsl:apply-templates/>
+            </xsl:otherwise>
         </xsl:choose>       
     </xsl:template>
 
     <xsl:template match="w:footnoteReference" mode="footnotepull">
         <xsl:choose>
-            <xsl:when test="$title-footnotes-section ne ''">
+            <xsl:when test="$suppress-footnotes ne 'true'">
                 <xsl:variable name="id" select="generate-id()" as="xs:string"/>
                 <xsl:variable name="fnid" select="@w:id" as="xs:string"/>
                 <xsl:apply-templates select="$footnotedoc/w:footnotes/w:footnote[@w:id = $fnid]/*">
                     <xsl:with-param name="id" select="$id" tunnel="yes" as="xs:string"/>
                 </xsl:apply-templates>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:apply-templates/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-
-    <xsl:template match="w:footnoteRef">
-        <!-- w:footnoteRef is in the footnotes document. -->
-        <xsl:param name="id" required="yes" tunnel="yes"/>
-        <xsl:choose>
-            <xsl:when test="$title-footnotes-section ne ''">
-                <styled-content style="{concat($style-prefix, 'footnoteNum')}">
-                    <xref rid="{concat($FOOTNOTEBACKPREFIX, $id)}" id="{concat($FOOTNOTEPREFIX, $id)}">
-                        <xsl:number/>
-                    </xref>
-                </styled-content>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:apply-templates/>
