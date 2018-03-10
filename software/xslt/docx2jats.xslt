@@ -5,6 +5,11 @@
 
     <!-- Result language. If absent, try to find it in the document. -->
     <xsl:param name="language-code" as="xs:string" select="''"/>
+    
+    <!-- Two required metadata values: -->
+    <xsl:param name="ib-article-type" select="''"/>    
+    <xsl:param name="legacy-dspace-id" select="''"/>
+
     <!-- Prefix for generated style names; note: do not use characters that need to be escaped in a regex -->
     <xsl:param name="style-prefix" select="'PCM-'"/>
 
@@ -672,6 +677,24 @@
                     <pub-date>
                         <year/>
                     </pub-date>
+                    <custom-meta-group>
+                        <custom-meta>
+                            <meta-name>markup-level</meta-name>
+                            <meta-value>base</meta-value>
+                        </custom-meta>
+                        <custom-meta>
+                            <meta-name>ib-model-version</meta-name>
+                            <meta-value>1.0</meta-value>
+                        </custom-meta>
+                        <custom-meta>
+                            <meta-name>ib-article-type</meta-name>
+                            <meta-value>{$ib-article-type}</meta-value>
+                        </custom-meta>
+                        <custom-meta>
+                            <meta-name>legacy-dspace-id</meta-name>
+                            <meta-value>{$legacy-dspace-id}</meta-value>
+                        </custom-meta>
+                    </custom-meta-group>
                 </article-meta>
             </front>
             <xsl:apply-templates select="w:body"/>
