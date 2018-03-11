@@ -8,7 +8,6 @@ fi
 
 WHEREAMI=$(dirname $(realpath $0))
 
-set -x
 for f in `find "$1" -name '*.docx'`
 do
     echo Processing file $f
