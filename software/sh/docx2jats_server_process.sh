@@ -16,7 +16,10 @@ do
     basenamenoext=`basename "$f" .docx`
     parentdir=`dirname "$dir"`
     mv "$f" "$parentdir/process"
-    $WHEREAMI/docx2jats.sh "$parentdir/process/$basename" >"$parentdir/results/$basenamenoext.log" 2>&1 
+    logfile=$parentdir/results/$basenamenoext.log
+    echo "Start of docx2jats conversion of $basename on `date`" >$logfile 
+    $WHEREAMI/docx2jats.sh "$parentdir/process/$basename" >>"$logfile" 2>&1 
+    echo "End of docx2jats conversion of $basename on `date`" >>$logfile 
     zip -r "$parentdir/results/$basenamenoext.zip" "$parentdir/process/$basenamenoext"
     rm -Rf "$parentdir/process/$basename" "$parentdir/process/$basenamenoext"
 done
