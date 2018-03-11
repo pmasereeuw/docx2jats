@@ -8,7 +8,7 @@ fi
 
 WHEREAMI=$(dirname $(realpath $0))
 
-for f in find "$1" -name '*.docx'
+for f in `find "$1" -name '*.docx'`
 do
     echo Processing file $f
     dir=`dirname "$f"`
