@@ -8,6 +8,7 @@ fi
 
 WHEREAMI=$(dirname $(realpath $0))
 
+set -x
 for f in `find "$1" -name '*.docx'`
 do
     echo Processing file $f
@@ -16,8 +17,8 @@ do
     basenamenoext=`basename "$f" .docx`
     parentdir=`dirname "$dir"`
     mv "$f" "$parentdir/process"
-    $WHEREAMI/docx2jats.sh "$parentdir/process/$basename" >"$parentdir/../results/process/$basenamenoext.log" 2>&1 
-    zip -r "$parentdir/../results/process/$basenamenoext.zip" "$parentdir/process/$basenamenoext"
+    $WHEREAMI/docx2jats.sh "$parentdir/process/$basename" >"$parentdir/results/process/$basenamenoext.log" 2>&1 
+    zip -r "$parentdir/results/$basenamenoext.zip" "$parentdir/process/$basenamenoext"
     rm -Rf "$parentdir/process/$basename" "$parentdir/process/$basenamenoext"
 done
 
