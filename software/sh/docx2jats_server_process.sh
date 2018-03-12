@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This is where docx files are copied for future use. Make sure it is writable for the webserver (www-data):
+DOCX_VAULT=/home/pieter/ibo
+
 if [ -z "$1" ]
 then
     echo "$0: directory parameter missing" >&2
@@ -11,6 +14,7 @@ WHEREAMI=$(dirname $(realpath $0))
 for f in `find "$1" -name '*.docx'`
 do
     echo Processing file $f
+    cp "$f" "$DOCX_VAULT"
     dir=`dirname "$f"`
     basename=`basename "$f"`
     basenamenoext=`basename "$f" .docx`
