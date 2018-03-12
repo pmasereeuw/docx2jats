@@ -23,10 +23,16 @@ do
     logfile=$parentdir/results/$basenamenoext.log
     echo "Start of docx2jats conversion of $basename on `date`" >$logfile 
     $WHEREAMI/docx2jats.sh "$parentdir/process/$basename" >>"$logfile" 2>&1
-    SAVEDIR=`pwd`
-    cd "$parentdir/process/$basenamenoext"
-    zip -r "$parentdir/results/$basenamenoext.zip" *
-    cd "$SAVEDIR"
+    resultdir=$parentdir/process/$basenamenoext
+    if [ -d "$resultdir" ]
+    then
+        SAVEDIR=`pwd`
+        cd "$resultdir"
+        zip -r "$resultdir.zip" *
+        cd "$SAVEDIR"
+    else
+        echo "Directory $resultdir is missing, giving up" >>"$logfile"
+    fi
     echo "End of docx2jats conversion of $basename on `date`" >>$logfile 
     rm -Rf "$parentdir/process/$basename" "$parentdir/process/$basenamenoext"
 done
