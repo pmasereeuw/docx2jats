@@ -9,7 +9,7 @@
     
     <xsl:template match="/">
         <graphics>
-            <xsl:for-each select="distinct-values(//graphic/@xlink:href)">
+            <xsl:for-each select="distinct-values(//graphic/@xlink:href[not(matches(., '^https?:'))])">
                 <graphic href="{.}"/>
             </xsl:for-each>
         </graphics>
