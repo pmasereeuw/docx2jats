@@ -165,13 +165,19 @@
             </xsl:choose>
         </xsl:variable>
 
-        <!-- Since all images have been copied locally in the same folder as the result files, we can strip the path from the file name: -->
-        <xsl:variable name="path-with-slashes" select="translate($pathname, '\', '/')"/>
-        <xsl:value-of select="
-                if (contains($path-with-slashes, '/')) then
-                    replace($path-with-slashes, '^.*/([^/]+)$', '$1')
-                else
-                    $path-with-slashes"/>
+        <!-- Since all images have been copied locally in the same folder as the result files, we can strip the path from the file name (unless, of course, it is an http(s) reference: -->
+        <xsl:choose>
+            <xsl:when test="matches($pathname, '^https?:')">
+                <xsl:value-of select="$pathname"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="path-with-slashes" select="translate($pathname, '\', '/')"/>
+                <xsl:value-of select="
+                    if (contains($path-with-slashes, '/'))
+                    then replace($path-with-slashes, '^.*/([^/]+)$', '$1')
+                    else $path-with-slashes"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
 
     <xsl:function name="pcm:build-field-private" as="xs:string">
@@ -730,7 +736,9 @@
             <xsl:value-of select="pcm:get-bookmark-text(.)"/>
         </styled-content>
     </xsl:template>-->
-    <xsl:template match="w:bookmarkStart">
+    <xsl:template match="w:bookmarkStart[not(@w:displacedByCustomXml)]">
+        <!-- @w:displacedByCustomXml seems to be used if a <w:sdt> follows. It is not clear how to deal with it, and since the incident has no references to the bookmark,
+             it is left out (otherwise we would get infinite recursion in pcm:get-bookmark-text()). -->
         <styled-content id="{pcm:normalize-bookmark-id(@w:name)}" style="{concat($style-bookmark, ' ', $style-prefix, 'id-', pcm:get-xref-type(.))}">
             <xsl:value-of select="pcm:get-bookmark-text(.)"/>
         </styled-content>
