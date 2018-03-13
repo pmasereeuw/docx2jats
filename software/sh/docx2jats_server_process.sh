@@ -25,6 +25,11 @@ do
     $WHEREAMI/docx2jats.sh "$parentdir/process/$basename" >>"$logfile" 2>&1
     processresultdir=$parentdir/process/$basenamenoext
     resultzip=$parentdir/results/$basenamenoext.zip
+    if [ -f "$resultzip" ]
+    then
+        rm -f "$resultzip"
+    fi
+
     if [ -d "$processresultdir" ]
     then
         SAVEDIR=`pwd`
