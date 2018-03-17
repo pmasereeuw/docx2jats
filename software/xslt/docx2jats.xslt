@@ -1230,7 +1230,7 @@
                         </xsl:when>
                         <xsl:otherwise>
                             <tr>
-                                <td><p><xsl:value-of select="pcm:errormessage('No data found')"/></p></td>
+                                <td><p><xsl:value-of select="pcm:errormessage('No data found, table body seems to be empty')"/></p></td>
                             </tr>
                         </xsl:otherwise>
                     </xsl:choose>
