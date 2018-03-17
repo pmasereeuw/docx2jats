@@ -736,7 +736,7 @@
             <xsl:value-of select="pcm:get-bookmark-text(.)"/>
         </styled-content>
     </xsl:template>-->
-    <xsl:template match="w:bookmarkStart[not(@w:displacedByCustomXml)]">
+    <xsl:template match="w:bookmarkStart[not (parent::w:body) and not(@w:displacedByCustomXml)]">
         <!-- @w:displacedByCustomXml seems to be used if a <w:sdt> follows. It is not clear how to deal with it, and since the incident has no references to the bookmark,
              it is left out (otherwise we would get infinite recursion in pcm:get-bookmark-text()). -->
         <styled-content id="{pcm:normalize-bookmark-id(@w:name)}" style="{concat($style-bookmark, ' ', $style-prefix, 'id-', pcm:get-xref-type(.))}">
@@ -834,18 +834,27 @@
         <xsl:sequence select="exists($r/w:fldChar[@w:fldCharType = 'begin'])"/>
     </xsl:function>
 
-    <xsl:template match="w:hyperlink[@r:id]">
-        <ext-link xlink:href="{pcm:getHyperlinkTarget(.)}">
-            <xsl:apply-templates/>
-        </ext-link>
+    <xsl:template match="w:hyperlink">
+        <!-- Surprisingly, a w:hyperlink can have both an r:id and an w:anchor attribute. If this happens,
+             we give the external reference (r:id) precedence.
+        -->
+        <xsl:choose>
+            <xsl:when test="@r:id">
+                <ext-link xlink:href="{pcm:getHyperlinkTarget(.)}">
+                    <xsl:apply-templates/>
+                </ext-link>
+            </xsl:when>
+            <xsl:when test="@w:anchor">
+                <xref rid="{pcm:normalize-bookmark-id(@w:anchor)}">
+                    <xsl:apply-templates/>
+                </xref>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
-    <xsl:template match="w:hyperlink[@w:anchor]">
-        <xref rid="{pcm:normalize-bookmark-id(@w:anchor)}">
-            <xsl:apply-templates/>
-        </xref>
-    </xsl:template>
-    
     <xsl:template match="w:r[not(w:rPr) or w:rPr[not(*)]]">
         <xsl:choose>
             <xsl:when test="not(preceding-sibling::w:r) and pcm:has-field-start(.)">
