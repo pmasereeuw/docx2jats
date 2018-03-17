@@ -783,7 +783,7 @@
                 <xsl:variable name="numIdElement" select="$numPr/w:numId" as="element(w:numId)?"/>
                 <LI level="{$level}" style="{$style}" listtype="{if ($numIdElement) then pcm:lookupListStyleType($numIdElement/@w:val, $ilvl) else ''}">
                     <p>
-                        <xsl:apply-templates select="w:r | w:bookmarkStart | w:fldSimple"/>
+                        <xsl:apply-templates select="w:r | w:bookmarkStart | w:fldSimple | w:hyperlink"/>
                     </p>
                 </LI>
             </xsl:when>
