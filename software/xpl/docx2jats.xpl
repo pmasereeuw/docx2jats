@@ -145,7 +145,7 @@
     
     <p:xslt name="stap07">
         <p:input port="stylesheet">
-            <p:document href="../xslt/remove-empty-styled-content.xslt"/>
+            <p:document href="../xslt/remove-some-styled-content.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
