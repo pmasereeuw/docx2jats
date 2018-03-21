@@ -883,7 +883,7 @@
     </xsl:template>
     
     <xsl:template match="w:sdt[w:sdtPr/w:tag[@w:val eq 'IB=Accordion']]">
-        <boxed-text specific-use="collapsible">
+        <boxed-text position="anchor" specific-use="collapsible">
             <xsl:apply-templates/>
         </boxed-text>
     </xsl:template>
