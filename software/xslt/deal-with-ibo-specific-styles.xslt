@@ -73,7 +73,7 @@
     
     <!-- Match the first paragraph of a boxed-text section. -->
     <xsl:template match="*[pcm:style-pi-contains(., $NOTE-INDICATOR-STYLE) and not(pcm:style-pi-contains(preceding-sibling::*[1], $NOTE-INDICATOR-STYLE))]">
-        <boxed-text>
+        <boxed-text position="anchor">
             <xsl:apply-templates select="." mode="boxed-text"/>
             <xsl:iterate select="following-sibling::*">
                 <xsl:choose>
@@ -183,6 +183,20 @@
         </xsl:variable>
         
         <xsl:attribute name="style" select="string-join(($adjusted-styles, $text-align), ';')"/>
+    </xsl:template>
+    
+    <!-- *** Empty list items *** -->
+    <xsl:function name="pcm:is-empty-list-item" as="xs:boolean">
+        <xsl:param name="li" as="element(list-item)"/>
+        <xsl:sequence select="empty($li//text()[normalize-space() ne '']) and empty($li//fig) and empty($li//inline-graphic)"/>
+    </xsl:function>
+    
+    <xsl:template match="list[every $li in list-item satisfies pcm:is-empty-list-item($li)]">
+        <xsl:comment>List with only empty list items removed.</xsl:comment>
+    </xsl:template>
+    
+    <xsl:template match="list-item[pcm:is-empty-list-item(.)]">
+        <xsl:comment>Empty list-item removed</xsl:comment>
     </xsl:template>
     
 </xsl:stylesheet>
