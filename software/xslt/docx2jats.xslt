@@ -426,8 +426,7 @@
 
     <xsl:function name="pcm:getTableBordersElementFromTable" as="element(w:tblBorders)?">
         <xsl:param name="nodeInsideTable" as="node()"/>
-
-        <xsl:variable name="tblBordersThisTable" select="$nodeInsideTable/ancestor-or-self::w:tbl/w:tblPr/w:tblBorders" as="element(w:tblBorders)?"/>
+        <xsl:variable name="tblBordersThisTable" select="$nodeInsideTable/ancestor-or-self::w:tbl[1]/w:tblPr/w:tblBorders" as="element(w:tblBorders)?"/>
 
         <xsl:sequence select="$tblBordersThisTable"/>
     </xsl:function>
