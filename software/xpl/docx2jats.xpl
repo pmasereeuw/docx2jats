@@ -15,7 +15,9 @@
     <p:option name="style-prefix" select="'IB-'"/>
     <p:option name="prefix-to-rng-schema" select="''"/>
     <p:option name="prefix-to-sch-schema" select="''"/>
-
+    <p:option name="git-branch" select="''"/>
+    <p:option name="git-version" select="''"/>
+    
     <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
     
     <p:import href="message.xpl"/>
@@ -176,6 +178,20 @@
         <p:with-param name="prefix-to-rng-schema" select="$prefix-to-rng-schema"/>
         <p:with-param name="prefix-to-sch-schema" select="$prefix-to-sch-schema"/>
     </p:xslt>
+    
+    <p:choose>
+        <p:when test="$git-branch ne '' and $git-version ne ''">
+            <p:xslt name="stap10">
+                <p:input port="stylesheet">
+                    <p:document href="../xslt/add-git-info.xslt"/>
+                </p:input>
+                <p:with-param name="debug" select="$debug"/>
+                <p:with-param name="git-branch" select="$git-branch"/>
+                <p:with-param name="git-version" select="$git-version"/>
+            </p:xslt>
+        </p:when>
+        <p:otherwise><p:identity/></p:otherwise>
+    </p:choose>
     
     <p:identity name="before-store"/>
     

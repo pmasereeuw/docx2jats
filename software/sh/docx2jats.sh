@@ -62,6 +62,14 @@ then
    rm -Rf "$outputfolder"
 fi
 
+SAVEDIR=`pwd`
+cd "$SOFTWAREFOLDER/..";
+BRANCH=`git branch | grep \* | cut -d ' ' -f2-`
+VERSION=`git describe --tags --always`
+cd "$SAVEDIR"
+
+echo Git repo version: $VERSION, branch $BRANCH
+
 "$SHFOLDER/xproc.sh" "$XPLFOLDER/docx2jats.xpl" \
   "debug=$DEBUG" \
   "relsfile=file://$workfolder/_rels/.rels" \
@@ -70,7 +78,9 @@ fi
   "outputmediadirectory=file://$outputfolder" \
   "language-code=$language_code" \
   "prefix-to-rng-schema=$PREFIX_TO_RNG_SCHEMA" \
-  "prefix-to-sch-schema=$PREFIX_TO_SCH_SCHEMA"
+  "prefix-to-sch-schema=$PREFIX_TO_SCH_SCHEMA" \
+  "git-branch=$BRANCH" \
+  "git-version=$VERSION"
 
 if [ $KEEPTMP = yes ]
 then
