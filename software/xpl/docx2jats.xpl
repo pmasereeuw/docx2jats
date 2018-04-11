@@ -152,19 +152,14 @@
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
     
-    <p:xslt name="stap08a">
+    <p:xslt name="stap08">
         <p:input port="stylesheet">
             <p:document href="../xslt/fix-inlines.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
     
-    <pcm:tee>
-        <p:with-option name="href" select="'/tmp/DEBUG/klad.xml'"/>
-        <p:with-option name="indent" select="false()"/>
-    </pcm:tee>
-    
-    <p:xslt name="stap08b">
+    <p:xslt name="stap09">
         <p:input port="stylesheet">
             <p:document href="../xslt/join-inlines.xslt"/>
         </p:input>
@@ -182,7 +177,7 @@
         </p:otherwise>
     </p:choose>
     
-    <p:xslt name="stap09">
+    <p:xslt name="stap10">
         <p:input port="stylesheet">
             <p:document href="../xslt/add-schemata.xslt"/>
         </p:input>
@@ -193,7 +188,7 @@
     
     <p:choose>
         <p:when test="$git-branch ne '' and $git-version ne ''">
-            <p:xslt name="stap10">
+            <p:xslt>
                 <p:input port="stylesheet">
                     <p:document href="../xslt/add-git-info.xslt"/>
                 </p:input>
