@@ -12,6 +12,7 @@
     <p:option name="outputmediadirectory" required="true"/>
     <p:option name="outputfile" required="true"/>
     <p:option name="language-code" required="false"/>
+    <p:option name="resource-prefix" required="true"/>
     <p:option name="style-prefix" select="'IB-'"/>
     <p:option name="prefix-to-rng-schema" select="''"/>
     <p:option name="prefix-to-sch-schema" select="''"/>
@@ -35,6 +36,7 @@
         <p:with-param name="debug" select="$debug"/>
         <p:with-param name="language-code" select="$language-code"/>
         <p:with-param name="style-prefix" select="$style-prefix"/>
+        <p:with-param name="resource-prefix" select="$resource-prefix"/>
     </p:xslt>
     
     <p:choose>
@@ -213,6 +215,7 @@
         <p:input port="source">
             <p:pipe port="result" step="before-store"/>
         </p:input>
+        <p:with-param name="resource-prefix" select="$resource-prefix"/>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
 

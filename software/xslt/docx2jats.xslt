@@ -8,6 +8,12 @@
     <!-- Result language. If absent, try to find it in the document. -->
     <xsl:param name="language-code" as="xs:string" select="''"/>
     
+    <!-- Prefix used for references to resources (figures); if a folder is intended, it should end in a slash.
+         It is only used for the value of the href in the conversion result. Where the input files are stored,
+         is defined in collect-graphics.xslt.
+    -->
+    <xsl:param name="resource-prefix" select="''"/>
+    
     <!-- Two required metadata values: -->
     <xsl:param name="ib-article-type" select="''"/>    
     <xsl:param name="legacy-dspace-id" select="''"/>
@@ -1112,7 +1118,7 @@
 
         <xsl:variable name="mimetype-info" as="xs:string+" select="pcm:mimetype-from-extension($imageFileName)"/>
         <fig>
-            <graphic xlink:href="{$imageFileName}">
+            <graphic xlink:href="{$resource-prefix || $imageFileName}">
                 <xsl:if test="count($mimetype-info) eq 2">
                     <xsl:attribute name="mimetype" select="$mimetype-info[1]"/>
                     <xsl:attribute name="mime-subtype" select="$mimetype-info[2]"/>

@@ -41,6 +41,8 @@ basedocxfile=`basename "$docxfile" .docx`
 fullpathdocxfile=`realpath "$docxfile"`
 dirofdocxfile=`dirname "$fullpathdocxfile"`
 outputfolder=$dirofdocxfile/$basedocxfile
+resource_prefix=resources/
+
 if [ $KEEPTMP = yes ]
 then
      workfolder=$TMPFOLDER/$basedocxfile
@@ -75,8 +77,9 @@ echo Git repo version: $VERSION, branch $BRANCH
   "relsfile=file://$workfolder/_rels/.rels" \
   "outputfile=file://$outputfolder/$basedocxfile.xml" \
   "inputmediadirectory=file://$workfolder/word/media" \
-  "outputmediadirectory=file://$outputfolder" \
+  "outputmediadirectory=file://$outputfolder/$resource_prefix" \
   "language-code=$language_code" \
+  "resource-prefix=$resource_prefix" \
   "prefix-to-rng-schema=$PREFIX_TO_RNG_SCHEMA" \
   "prefix-to-sch-schema=$PREFIX_TO_SCH_SCHEMA" \
   "git-branch=$BRANCH" \
