@@ -75,13 +75,20 @@
                 <xsl:for-each-group select="$group" group-starting-with="p[pcm:p-has-required-level(., $required-level)]">
                     <xsl:choose>
                         <xsl:when test="current-group()[self::p[pcm:p-has-required-level(., $required-level)]]">
-                            <sec>
-                                <xsl:apply-templates select="current-group()[self::p[pcm:p-has-required-level(., $required-level)]]"/>
-                                <xsl:call-template name="apply-section">
-                                    <xsl:with-param name="required-level" select="$required-level + 1" as="xs:integer"/>
-                                    <xsl:with-param name="group" select="current-group()[not(pcm:p-has-required-level(., $required-level))]"/>
-                                </xsl:call-template>
-                            </sec>    
+                            <xsl:choose>
+                                <xsl:when test="$required-level eq 0">
+                                    <xsl:call-template name="do-section-with-title">
+                                        <xsl:with-param name="required-level" select="$required-level"/>
+                                    </xsl:call-template>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <sec>
+                                        <xsl:call-template name="do-section-with-title">
+                                            <xsl:with-param name="required-level" select="$required-level"/>
+                                        </xsl:call-template>
+                                    </sec>    
+                                </xsl:otherwise>
+                            </xsl:choose>
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:apply-templates select="current-group()"/>
@@ -97,6 +104,16 @@
                 </xsl:call-template>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template name="do-section-with-title">
+        <xsl:param name="required-level" as="xs:integer" required="yes"/>
+        <xsl:apply-templates select="current-group()[self::p[pcm:p-has-required-level(., $required-level)]]"/>
+        <xsl:call-template name="apply-section">
+            <xsl:with-param name="required-level" select="$required-level + 1" as="xs:integer"/>
+            <xsl:with-param name="group" select="current-group()[not(pcm:p-has-required-level(., $required-level))]"/>
+        </xsl:call-template>
+        
     </xsl:template>
     
     <xsl:template match="body">
