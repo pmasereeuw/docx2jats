@@ -152,9 +152,21 @@
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
     
-    <p:xslt name="stap08">
+    <p:xslt name="stap08a">
         <p:input port="stylesheet">
             <p:document href="../xslt/fix-inlines.xslt"/>
+        </p:input>
+        <p:with-param name="debug" select="$debug"/>
+    </p:xslt>
+    
+    <pcm:tee>
+        <p:with-option name="href" select="'/tmp/DEBUG/klad.xml'"/>
+        <p:with-option name="indent" select="false()"/>
+    </pcm:tee>
+    
+    <p:xslt name="stap08b">
+        <p:input port="stylesheet">
+            <p:document href="../xslt/join-inlines.xslt"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
     </p:xslt>
