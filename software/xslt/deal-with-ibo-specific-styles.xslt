@@ -8,8 +8,8 @@
     
     <xsl:variable name="NOTE-HEADING-STYLE" as="xs:string" select="'IB-note_heading1'"/>
     <xsl:variable name="NOTE-INDICATOR-STYLE" as="xs:string" select="'IB-note'"/>
-    <xsl:variable name="CAPTION-FIRST-STYLE" as="xs:string" select="'IB-caption_number'"/>
-    <xsl:variable name="CAPTION-NEXT-STYLE" as="xs:string" select="'IB-caption_text'"/>
+    <xsl:variable name="CAPTION-FIRST-STYLE" as="xs:string" select="'IB-caption_number_centred'"/>
+    <xsl:variable name="CAPTION-NEXT-STYLE" as="xs:string" select="'IB-caption_text_centred'"/>
     <xsl:variable name="CONTINUED-LIST_STYLE" as="xs:string" select="'IB-continued-list'"/>
     
     <xsl:function name="pcm:style-pi-contains"  as="xs:boolean">
@@ -108,23 +108,30 @@
     
     <!-- **** fig with caption *** -->
     
-    <xsl:template match="fig[parent::p[following-sibling::*[1][self::p[pcm:style-pi-contains(., $CAPTION-FIRST-STYLE)]]]]">
+    <xsl:template match="p[pcm:style-pi-contains(., $CAPTION-FIRST-STYLE)]/fig">
         <xsl:copy>
             <xsl:apply-templates select="@*"/>
-            <xsl:apply-templates select="parent::p/following-sibling::*[1][self::p]" mode="caption"/>
-            <xsl:apply-templates select="node()"/>
+            <label><xsl:apply-templates select="parent::p/node()[not(self::fig)]" mode="caption"/></label>
+            <xsl:if test="parent::p/following-sibling::*[1][pcm:style-pi-contains(., $CAPTION-NEXT-STYLE)]">
+                <caption>
+                    <xsl:apply-templates select="parent::p/following-sibling::*[1]" mode="caption"/>
+                </caption>
+            </xsl:if>
+            <xsl:copy-of select="graphic"/>
         </xsl:copy>
     </xsl:template>
     
-    <!-- Element is pulled inside fig. -->
-    <xsl:template match="p[(pcm:style-pi-contains(., $CAPTION-FIRST-STYLE) or pcm:style-pi-contains(., $CAPTION-NEXT-STYLE)) and pcm:fig-precedes-caption(preceding-sibling::*[1])]"/>
-
-    <xsl:template match="p[pcm:style-pi-contains(., $CAPTION-FIRST-STYLE)]" mode="caption">
-        <caption>
-            <title><xsl:apply-templates select="@* | node()"/></title>
-            <xsl:apply-templates select="following-sibling::*[1][pcm:style-pi-contains(., $CAPTION-NEXT-STYLE)]" mode="caption"/>
-        </caption>
+    <!-- Drop non-figure content inside a figure paragraph with a caption since it is pulled inside the label. -->
+    <xsl:template match="p[fig and pcm:style-pi-contains(., $CAPTION-FIRST-STYLE)]/node()[not(self::fig)]"/>
+    
+    <xsl:template match="p[fig and pcm:style-pi-contains(., $CAPTION-FIRST-STYLE)]/node()[not(self::fig)]" mode="caption">
+        <xsl:copy>
+            <xsl:apply-templates select="@* | node()"/>
+        </xsl:copy>
     </xsl:template>
+    
+    <!-- Elements are pulled inside fig. -->
+    <xsl:template match="p[(pcm:style-pi-contains(., $CAPTION-FIRST-STYLE) or pcm:style-pi-contains(., $CAPTION-NEXT-STYLE)) and pcm:fig-precedes-caption(preceding-sibling::*[1])]"/>
     
     <xsl:template match="p[pcm:style-pi-contains(., $CAPTION-NEXT-STYLE)]" mode="caption">
         <p><xsl:apply-templates select="@* | node()"/></p>
