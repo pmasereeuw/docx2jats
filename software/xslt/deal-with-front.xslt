@@ -10,7 +10,9 @@
             <xsl:apply-templates select="(/article/body//title)[1]/node()" mode="pull-body-title-to-front"/>
         </xsl:copy>
     </xsl:template>
-
+    
+    <xsl:template match="body/*[1][self::title]"/>
+    
     <xsl:template match="node() | @*">
         <xsl:copy>
             <xsl:apply-templates select="node() | @*"/>
