@@ -6,7 +6,7 @@
     <!-- Stylenames (from the Word styles document, but normalized (e.g., spaces to underscore, lower case) that
          indicate that we are dealing with a list:
     -->
-    <xsl:variable name="bullet_list-style-names" as="xs:string+" select="('list_unordered', 'continued_list_unordered', 'listbullet', 'list_bullet','note_list_(bullet)')"/>
+    <xsl:variable name="bullet_list-style-names" as="xs:string+" select="('list_unordered', 'continued_list_unordered', 'listbullet', 'list_bullet', 'list_(bullet)', 'note_list_(bullet)')"/>
     <xsl:variable name="number_list-style-names" as="xs:string+" select="('list_arabic', 'continued_list_arabic', 'list_number')"/>
     
     <xsl:variable name="list-style-names" as="xs:string+" select="($bullet_list-style-names, $number_list-style-names)"/>
