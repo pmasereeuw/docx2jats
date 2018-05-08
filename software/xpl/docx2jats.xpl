@@ -51,6 +51,25 @@
         </p:otherwise>
     </p:choose>
     
+    <p:xslt name="stap01a">
+        <p:input port="stylesheet">
+            <p:document href="../xslt/deal-with-mathtype.xslt"/>
+        </p:input>
+        <p:with-param name="debug" select="$debug"/>
+    </p:xslt>
+    
+    <p:choose>
+        <p:when test="$debug eq 'true'">
+            <pcm:tee>
+                <p:with-option name="href" select="'/tmp/DEBUG/020.xml'"/>
+                <p:with-option name="indent" select="true()"/>
+            </pcm:tee>
+        </p:when>
+        <p:otherwise>
+            <p:identity/>
+        </p:otherwise>
+    </p:choose>
+    
     <p:xslt name="stap02">
         <p:input port="stylesheet">
             <p:document href="../xslt/apply-jats-sections.xslt"/>
@@ -62,7 +81,7 @@
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
-                <p:with-option name="href" select="'/tmp/DEBUG/020.xml'"/>
+                <p:with-option name="href" select="'/tmp/DEBUG/030.xml'"/>
                 <p:with-option name="indent" select="true()"/>
             </pcm:tee>
         </p:when>
@@ -81,7 +100,7 @@
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
-                <p:with-option name="href" select="'/tmp/DEBUG/030.xml'"/>
+                <p:with-option name="href" select="'/tmp/DEBUG/040.xml'"/>
                 <p:with-option name="indent" select="true()"/>
             </pcm:tee>
         </p:when>
@@ -100,7 +119,7 @@
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
-                <p:with-option name="href" select="'/tmp/DEBUG/040.xml'"/>
+                <p:with-option name="href" select="'/tmp/DEBUG/050.xml'"/>
                 <p:with-option name="indent" select="true()"/>
             </pcm:tee>
         </p:when>
@@ -119,7 +138,7 @@
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
-                <p:with-option name="href" select="'/tmp/DEBUG/050.xml'"/>
+                <p:with-option name="href" select="'/tmp/DEBUG/060.xml'"/>
                 <p:with-option name="indent" select="true()"/>
             </pcm:tee>
         </p:when>
@@ -138,7 +157,7 @@
     <p:choose>
         <p:when test="$debug eq 'true'">
             <pcm:tee>
-                <p:with-option name="href" select="'/tmp/DEBUG/060.xml'"/>
+                <p:with-option name="href" select="'/tmp/DEBUG/070.xml'"/>
                 <p:with-option name="indent" select="true()"/>
             </pcm:tee>
         </p:when>
