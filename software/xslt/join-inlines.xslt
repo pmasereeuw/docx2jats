@@ -10,6 +10,7 @@
         <xsl:param name="node" as="node()"/>
         <xsl:variable name="result" as="xs:string">
             <xsl:choose>
+                <xsl:when test="$node/self::inline-formula or $node/self::fig"><xsl:value-of select="''"/></xsl:when>
                 <xsl:when test="$node/self::element()"><xsl:value-of select="local-name($node)"/></xsl:when>
                 <xsl:when test="$node/self::text()[normalize-space() eq '']"><xsl:value-of select="if (exists($node/preceding-sibling::*)) then local-name($node/preceding-sibling::*[1]) else ''"/></xsl:when>
                 <xsl:otherwise><xsl:value-of select="''"/></xsl:otherwise>
