@@ -206,4 +206,8 @@
         <xsl:comment>Empty list-item removed</xsl:comment>
     </xsl:template>
     
+    <xsl:template match="td/title">
+        <p><bold><xsl:apply-templates/></bold></p>
+    </xsl:template>
+    
 </xsl:stylesheet>
