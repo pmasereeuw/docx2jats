@@ -4,7 +4,7 @@
     <xsl:param name="git-branch" required="yes"/>
     <xsl:param name="git-version" required="yes"/>
     
-    <xsl:template match="/">
+    <xsl:template match="/*">
        <xsl:copy>
            <xsl:comment>Generated on {current-dateTime()} by docx2jats4ib, software version (git) {$git-version}, branch: {$git-branch}.</xsl:comment>
            <xsl:apply-templates/>
