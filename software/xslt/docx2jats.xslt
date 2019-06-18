@@ -706,11 +706,14 @@
     <xsl:template match="w:bookmarkStart[not (parent::w:body) and not(@w:displacedByCustomXml)]">
         <!-- @w:displacedByCustomXml seems to be used if a <w:sdt> follows. It is not clear how to deal with it, and since the incident has no references to the bookmark,
              it is left out (otherwise we would get infinite recursion in pcm:get-bookmark-text()). -->
-        <styled-content id="{pcm:normalize-bookmark-id(@w:name)}" style="{concat($style-bookmark, ' ', $style-prefix, 'id-', pcm:get-xref-type(.))}">
-            <xsl:value-of select="pcm:get-bookmark-text(.)"/>
-        </styled-content>
+        <xsl:if test="not(pcm:bookmarkstart-precedes(preceding-sibling::*[1][self::w:bookmarkStart]))">
+            <styled-content id="{pcm:normalize-bookmark-id(@w:name)}" style="{concat($style-bookmark, ' ', $style-prefix, 'id-', pcm:get-xref-type(.))}">
+                <xsl:value-of select="pcm:get-bookmark-text(.)"/>
+            </styled-content>
+        </xsl:if>
+        <!-- Else: do not process, this would cause the text to be duplicated. -->
     </xsl:template>
-
+    
     <xsl:template match="w:fldSimple[not(pcm:bookmarkstart-precedes(.))]">
         <xsl:variable name="fieldcode" select="@w:instr"/>
         <xsl:variable name="seqtype" select="lower-case(replace($fieldcode, '^ *SEQ +([^ ]+).*$', '$1'))" as="xs:string?"/>
